@@ -1,1 +1,73 @@
+library("rstudioapi") # Load rstudioapi package
+setwd(dirname(getActiveDocumentContext()$path)) # Set working directory to source file location
+getwd() # Check updated working directory
+
+source("RD_and_DT_Algorithm.R")  # Ensure this file is in the same directory
+
+
+# Load the shared bgpp1_1 data
+bgpp1_1 <- read.csv("bgpp1/bgno1.csv", header = FALSE, row.names = NULL)
+colnames(bgpp1_1) <- c('x', 'y', 'cost', 'prob')
+bgpp1_1$status <- 0
+bgpp1_1$cost <- 5
+
+# Initialize list to hold the combined data frames
+the1_20_1_list <- list()
+
+
+
+results_1_20_1 <- data.frame(
+  ii = integer(),
+  jj = numeric(),
+  kk = numeric(),
+  Cost = numeric(),
+  NumDisambigs = integer()
+)
+
+
+
+# Loop through j from 1 to 19
+for (j in 1:19) {
+  # Build the obstacle file path
+  path <- paste0("CodeRD/code/obstpp", j, "/obstpp", j, "_20_1.csv")
+  
+  # Read obstacle data
+  obst <- read.csv(path, header = FALSE, row.names = NULL)
+  colnames(obst) <- c('x', 'y', 'cost', 'prob')
+  obst$status <- 1
+  obst$cost <- 5
+  
+  # Combine with bgpp1_1
+  combined <- rbind(bgpp1_1, obst)
+  
+  # Store in list with name like "the1_1_20_1", etc.
+  the1_20_1_list[[paste0("the1_", j, "_20_1")]] <- combined
+  
+  
+}
+
+
+
+for (j in 1:1) {
+thetest <- RD_Alg_M(the1_20_1_list[[paste0("the1_", j, "_20_1")]])
+
+
+results_1_20_1[j, ] <- list(
+  ii = 1,
+  jj = j,
+  kk = 20,
+  Cost = thetest$Length_total,
+  NumDisambigs = length(thetest$Disambiguate_state)
+)
+
+}
+
+
+output_dir <- file.path(getwd(), "outputs/1_20_1")
+dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+cat("Created directory:", output_dir, "\n")
+
+saveRDS(results_1_20_1, file.path(output_dir, "data_1_20_1.rds"))
+
+
 
